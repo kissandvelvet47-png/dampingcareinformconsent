@@ -1,4 +1,4 @@
-import { FormData, DocumentVariant } from '../types';
+import { FormData } from '../types';
 import SignatureCanvas from './SignatureCanvas';
 
 interface Props {
@@ -6,33 +6,9 @@ interface Props {
   onChange: (updates: Partial<FormData>) => void;
 }
 
-const VARIANTS: { id: DocumentVariant; label: string; desc: string }[] = [
-  { id: 'classic', label: 'Classic Hospital', desc: 'Formulir Rumah Sakit' },
-  { id: 'legal', label: 'Official Legal', desc: 'Surat Persetujuan Resmi' },
-  { id: 'minimal', label: 'Minimal Clean', desc: 'Administrasi Modern' },
-];
-
 export default function FormPanel({ data, onChange }: Props) {
   return (
     <div className="form-panel">
-      {/* Variant Selector */}
-      <div className="form-section">
-        <label className="form-section-title">Pilih Desain</label>
-        <div className="variant-grid">
-          {VARIANTS.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              className={`variant-btn ${data.variant === v.id ? 'variant-btn--active' : ''}`}
-              onClick={() => onChange({ variant: v.id })}
-            >
-              <span className="variant-btn__name">{v.label}</span>
-              <span className="variant-btn__desc">{v.desc}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Identity Fields */}
       <div className="form-section">
         <label className="form-section-title">Data Identitas</label>
@@ -93,12 +69,13 @@ export default function FormPanel({ data, onChange }: Props) {
           </div>
 
           <div className="form-field">
-            <label className="form-label">Nomor Dokumen</label>
+            <label className="form-label">Nomor Dokumen <span className="required">*</span></label>
             <input
               type="text"
-              className="form-input form-input--readonly"
-              value={data.nomorDokumen || 'Membuat nomor...'}
-              readOnly
+              className="form-input"
+              placeholder="IC-2026-0001"
+              value={data.nomorDokumen}
+              onChange={(e) => onChange({ nomorDokumen: e.target.value })}
             />
           </div>
         </div>

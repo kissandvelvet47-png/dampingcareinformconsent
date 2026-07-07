@@ -1,5 +1,3 @@
-export type DocumentVariant = 'classic' | 'legal' | 'minimal';
-
 export interface FormData {
   namaPasien: string;
   namaPengisi: string;
@@ -8,5 +6,4 @@ export interface FormData {
   tanggal: string;
   nomorDokumen: string;
   signatureDataUrl: string;
-  variant: DocumentVariant;
 }

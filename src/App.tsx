@@ -1,50 +1,35 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { RotateCcw, Eye, EyeOff, FileText, FileImage, Download, Loader2 } from 'lucide-react';
 import { FormData } from './types';
-import { generateDocumentNumber } from './lib/documentNumber';
 import { exportToDocx } from './lib/exportDocx';
 import { exportToPdf, exportToPng } from './lib/exportPdfPng';
 import FormPanel from './components/FormPanel';
 import DocumentPreview from './components/DocumentPreview';
 
-const defaultForm = (): Omit<FormData, 'nomorDokumen'> => ({
+const defaultForm = (): FormData => ({
   namaPasien: '',
   namaPengisi: '',
   hubungan: '',
   namaPelaksana: '',
   tanggal: new Date().toISOString().slice(0, 10),
+  nomorDokumen: '',
   signatureDataUrl: '',
-  variant: 'classic',
 });
 
 type ExportState = 'idle' | 'loading';
 
 export default function App() {
-  const [form, setForm] = useState<FormData>({ ...defaultForm(), nomorDokumen: '' });
+  const [form, setForm] = useState<FormData>(defaultForm());
   const [previewVisible, setPreviewVisible] = useState(true);
-  const [loadingDocNum, setLoadingDocNum] = useState(true);
   const [exportState, setExportState] = useState<Record<string, ExportState>>({});
   const previewRef = useRef<HTMLDivElement>(null);
-
-  const initDocNumber = useCallback(async () => {
-    setLoadingDocNum(true);
-    const num = await generateDocumentNumber();
-    setForm((prev) => ({ ...prev, nomorDokumen: num }));
-    setLoadingDocNum(false);
-  }, []);
-
-  useEffect(() => {
-    initDocNumber();
-  }, [initDocNumber]);
 
   const handleChange = (updates: Partial<FormData>) => {
     setForm((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleReset = async () => {
-    setForm({ ...defaultForm(), nomorDokumen: 'Membuat nomor...' });
-    const num = await generateDocumentNumber();
-    setForm({ ...defaultForm(), nomorDokumen: num });
+  const handleReset = () => {
+    setForm(defaultForm());
   };
 
   const withExport = async (key: string, fn: () => Promise<void>) => {
@@ -80,12 +65,6 @@ export default function App() {
   const isLoading = (key: string) => exportState[key] === 'loading';
   const anyLoading = Object.values(exportState).some((s) => s === 'loading');
 
-  const variantLabel = {
-    classic: 'Classic Hospital Form',
-    legal: 'Official Legal Document',
-    minimal: 'Minimal Clean Document',
-  }[form.variant];
-
   return (
     <div className="app-root">
       <header className="app-header">
@@ -102,12 +81,6 @@ export default function App() {
         <div className="app-layout">
           {/* Form Column */}
           <div className="app-form-col">
-            {loadingDocNum && (
-              <div className="doc-num-loading">
-                <Loader2 size={14} className="spin" />
-                <span>Membuat nomor dokumen...</span>
-              </div>
-            )}
             <FormPanel data={form} onChange={handleChange} />
 
             {/* Action Buttons */}
@@ -168,7 +141,7 @@ export default function App() {
             <div className="preview-sticky">
               <div className="preview-header">
                 <span className="preview-header__label">Preview Dokumen</span>
-                <span className="preview-header__variant">{variantLabel}</span>
+                <span className="preview-header__variant">Official Legal Document</span>
               </div>
               <div className="preview-scroll">
                 <DocumentPreview ref={previewRef} data={form} />
